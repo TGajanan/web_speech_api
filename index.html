@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voice to Text Converter</title>
+</head>
+<body>
+    <h1>Voice to Text Converter</h1>
+    <p>Click the 'Start Recording' button, speak, and the text will appear in the text area below.</p>
+
+    <button id="startRecording">Start Recording</button>
+    <button id="stopRecording" style="display:none;">Stop Recording</button>
+
+    <textarea id="outputText" rows="6" cols="50"></textarea>
+
+    <script>
+        // Check if the browser supports the SpeechRecognition API
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            const outputText = document.getElementById('outputText');
+            const startRecordingButton = document.getElementById('startRecording');
+            const stopRecordingButton = document.getElementById('stopRecording');
+
+            recognition.lang = 'en-US';  //set the language
+            recognition.interimResults = true;  // allow the results 
+            recognition.continuous = true;  // recongition continously 
+            
+
+            let finalTranscript = '';
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                outputText.value = finalTranscript + interimTranscript;
+            };
+
+            recognition.onend = function() {
+                startRecordingButton.style.display = 'block';
+                stopRecordingButton.style.display = 'none';
+            };
+
+            startRecordingButton.addEventListener('click', function() {
+                recognition.start();
+                startRecordingButton.style.display = 'none';
+                stopRecordingButton.style.display = 'block';
+                finalTranscript = '';
+                outputText.value = '';
+            });
+
+            stopRecordingButton.addEventListener('click', function() {
+                recognition.stop();
+                startRecordingButton.style.display = 'block';
+                stopRecordingButton.style.display = 'none';
+            });
+        } else {
+            alert('Speech recognition is not supported in your browser. Please use a modern browser.');
+        }
+    </script>
+</body>
+</html>
